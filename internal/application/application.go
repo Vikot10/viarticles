@@ -8,29 +8,28 @@ import (
 	"sync"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"go.uber.org/zap"
+	"github.com/rs/zerolog"
 
-	"github.com/Vikot10/viarticles/internal/dto"
+	"github.com/Vikot10/viarticles/internal/service/articleservice"
+	"github.com/Vikot10/viarticles/internal/service/vkservice"
 	"github.com/Vikot10/viarticles/internal/storage"
 )
 
 type Application struct {
-	logger *zap.Logger
-	store  *storage.Storage
-	vk     *VkProvider
+	logger *zerolog.Logger
+
+	as *articleservice.ArticleService
+	vk *vkservice.VkService
 }
 
-type VkProvider interface {
-	GetFaves() ([]*dto.Fave, error)
-}
+func New(store *storage.Storage, logger *zerolog.Logger) *Application {
+	app := &Application{}
 
-func New(store *storage.Storage, logger *zap.Logger) *Application {
+	app.as = articleservice.New(logger, store)
+	app.vk = vkservice.New(logger, "")
 
-	app := &Application{
-		store:  store,
-		logger: logger,
-	}
+	l := logger.With().Str("component", "application").Logger()
+	app.logger = &l
 
 	return app
 }
@@ -39,10 +38,7 @@ func (app *Application) Run(ctx context.Context, cancel context.CancelFunc, wg *
 	defer wg.Done()
 
 	r := chi.NewRouter()
-	r.Use(middleware.Recoverer)
-	r.Get("/", func(http.ResponseWriter, *http.Request) {}) // liveness probe
-
-	//app.registerRoutes(r)
+	app.registerRoutes(r)
 
 	server := http.Server{
 		Handler: r,
@@ -69,4 +65,5 @@ func (app *Application) Run(ctx context.Context, cancel context.CancelFunc, wg *
 		}
 		cancel()
 	}
+
 }

@@ -15,14 +15,18 @@ type Postgres struct {
 	NeedMigrate bool   `env:"NEED_MIGRATE" default:"false"`
 }
 
-type Config struct {
-	Debug         bool     `env:"DEBUG"`
-	Postgres      Postgres `env:"POSTGRES"`
-	Address       string   `env:"ADDRESS"`
-	VkAccessToken string   `env:"VK_ACCESS_TOKEN"`
+type Vk struct {
+	AccessToken string `env:"VK_ACCESS_TOKEN"`
 }
 
-func MustLoad() *Config {
+type Config struct {
+	IsDebug  bool     `env:"IS_DEBUG"`
+	Postgres Postgres `env:"POSTGRES"`
+	Address  string   `env:"ADDRESS"`
+	Vk       Vk       `env:"VK"`
+}
+
+func Load() *Config {
 	cfg := Config{}
 
 	err := aconfig.LoaderFor(&cfg, aconfig.Config{

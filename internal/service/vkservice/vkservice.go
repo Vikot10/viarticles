@@ -1,17 +1,20 @@
 package vkservice
 
 import (
-	"go.uber.org/zap"
+	"github.com/rs/zerolog"
 )
 
 type VkService struct {
-	logger      *zap.Logger
+	logger      *zerolog.Logger
 	accessToken string
 }
 
-func New(logger *zap.Logger, accessToken string) *VkService {
-	return &VkService{
-		logger:      logger,
-		accessToken: accessToken,
+func New(logger *zerolog.Logger, accessToken string) *VkService {
+	vk := VkService{
+		accessToken: "",
 	}
+	l := logger.With().Str("service", "vk service").Logger()
+	vk.logger = &l
+
+	return &vk
 }

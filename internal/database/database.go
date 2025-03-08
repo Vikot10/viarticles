@@ -8,13 +8,13 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	"go.uber.org/zap"
+	"github.com/rs/zerolog"
 )
 
 //go:embed database/*.sql
 var fsMain embed.FS
 
-func MakeMigration(pgConnection string, logger *zap.Logger) error {
+func MakeMigration(pgConnection string, logger *zerolog.Logger) error {
 	var d source.Driver
 	var errIofs error
 
@@ -40,14 +40,14 @@ func MakeMigration(pgConnection string, logger *zap.Logger) error {
 	errUp := m.Up()
 	if errUp != nil {
 		if errors.Is(errUp, migrate.ErrNoChange) {
-			logger.Info("no change for migrate")
+			logger.Info().Msg("no change for migrate")
 			return nil
 		}
 
 		return fmt.Errorf("error up migrate: %w", errUp)
 	}
 
-	logger.Info("migrate done")
+	logger.Info().Msg("migrate done")
 
 	return nil
 }

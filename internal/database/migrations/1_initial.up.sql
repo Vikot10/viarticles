@@ -9,7 +9,6 @@ create table article (
 );
 
 create table article_category (
-    id serial primary key,
     category_id integer not null,
     article_id integer not null
 );
