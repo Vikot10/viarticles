@@ -10,7 +10,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
 
+	"github.com/Vikot10/viarticles/internal/config"
 	"github.com/Vikot10/viarticles/internal/service/articleservice"
+	"github.com/Vikot10/viarticles/internal/service/habrservice"
+	"github.com/Vikot10/viarticles/internal/service/telegramservice"
 	"github.com/Vikot10/viarticles/internal/service/vkservice"
 	"github.com/Vikot10/viarticles/internal/storage"
 )
@@ -18,15 +21,19 @@ import (
 type Application struct {
 	logger *zerolog.Logger
 
-	as *articleservice.ArticleService
-	vk *vkservice.VkService
+	as   *articleservice.ArticleService
+	vk   *vkservice.VkService
+	tg   *telegramservice.TelegramService
+	habr *habrservice.HabrService
 }
 
-func New(store *storage.Storage, logger *zerolog.Logger) *Application {
+func New(store *storage.Storage, logger *zerolog.Logger, cfg *config.Config) *Application {
 	app := &Application{}
 
 	app.as = articleservice.New(logger, store)
-	app.vk = vkservice.New(logger, "")
+	app.vk = vkservice.New(logger, cfg.Vk.AccessToken, store)
+	app.tg = telegramservice.New(logger, cfg.Telegram.BotToken, store)
+	app.habr = habrservice.New(logger, cfg.Habr.AuthToken, store)
 
 	l := logger.With().Str("component", "application").Logger()
 	app.logger = &l

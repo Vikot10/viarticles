@@ -16,7 +16,15 @@ type Postgres struct {
 }
 
 type Vk struct {
-	AccessToken string `env:"VK_ACCESS_TOKEN"`
+	AccessToken string `env:"ACCESS_TOKEN"`
+}
+
+type Telegram struct {
+	BotToken string `env:"BOT_TOKEN"`
+}
+
+type Habr struct {
+	AuthToken string `env:"AUTH_TOKEN"`
 }
 
 type Config struct {
@@ -24,6 +32,8 @@ type Config struct {
 	Postgres Postgres `env:"POSTGRES"`
 	Address  string   `env:"ADDRESS"`
 	Vk       Vk       `env:"VK"`
+	Telegram Telegram `env:"TELEGRAM"`
+	Habr     Habr     `env:"HABR"`
 }
 
 func Load() *Config {

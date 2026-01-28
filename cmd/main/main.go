@@ -61,7 +61,7 @@ func run(cfg *config.Config, logger *zerolog.Logger) error {
 
 	store := storage.New(dbPool)
 
-	app := application.New(store, logger)
+	app := application.New(store, logger, cfg)
 	wg.Add(1)
 	go app.Run(ctx, cancel, &wg, ln)
 
