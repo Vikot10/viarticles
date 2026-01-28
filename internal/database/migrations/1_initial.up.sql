@@ -1,22 +1,40 @@
-create table article (
-    id serial primary key,
-    title nvarchar(255) not null,
-    body text default '',
-    url nvarchar(255) not null,
-    created_at timestamp default now(),
-    updated_at timestamp,
-    deleted_at timestamp
+-- Источники статей
+CREATE TYPE article_source AS ENUM ('manual', 'vk', 'telegram', 'habr');
+
+CREATE TABLE category (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE,
+    deleted_at TIMESTAMP WITH TIME ZONE
 );
 
-create table article_category (
-    category_id integer not null,
-    article_id integer not null
+CREATE INDEX idx_category_title ON category(title);
+CREATE INDEX idx_category_deleted_at ON category(deleted_at);
+
+CREATE TABLE article (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(500) NOT NULL,
+    body TEXT DEFAULT '',
+    url VARCHAR(2048) NOT NULL,
+    source article_source NOT NULL DEFAULT 'manual',
+    source_id VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE,
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT unique_source_id UNIQUE (source, source_id)
 );
 
-create table category (
-    id serial primary key,
-    title text not null,
-    created_at timestamp default now(),
-    updated_at timestamp,
-    deleted_at timestamp
+CREATE INDEX idx_article_url ON article(url);
+CREATE INDEX idx_article_source ON article(source);
+CREATE INDEX idx_article_deleted_at ON article(deleted_at);
+CREATE INDEX idx_article_created_at ON article(created_at DESC);
+
+CREATE TABLE article_category (
+    article_id INTEGER NOT NULL REFERENCES article(id) ON DELETE CASCADE,
+    category_id INTEGER NOT NULL REFERENCES category(id) ON DELETE CASCADE,
+    PRIMARY KEY (article_id, category_id)
 );
+
+CREATE INDEX idx_article_category_article ON article_category(article_id);
+CREATE INDEX idx_article_category_category ON article_category(category_id);
