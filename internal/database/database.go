@@ -11,14 +11,14 @@ import (
 	"github.com/rs/zerolog"
 )
 
-//go:embed database/*.sql
+//go:embed migrations/*.sql
 var fsMain embed.FS
 
 func MakeMigration(pgConnection string, logger *zerolog.Logger) error {
 	var d source.Driver
 	var errIofs error
 
-	d, errIofs = iofs.New(fsMain, "database")
+	d, errIofs = iofs.New(fsMain, "migrations")
 	if errIofs != nil {
 		return fmt.Errorf("error new iofs: %w", errIofs)
 	}
