@@ -1,0 +1,7 @@
+.git
+.idea
+.agents
+.cache
+.env
+data
+var

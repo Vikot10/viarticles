@@ -1,50 +1,43 @@
 package config
 
 import (
-	"github.com/cristalhq/aconfig"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
 )
 
-type Postgres struct {
-	Host        string `env:"HOST"`
-	Port        int    `env:"PORT"`
-	Username    string `env:"USERNAME"`
-	Password    string `env:"PASSWORD"`
-	Database    string `env:"DATABASE"`
-	SSLMode     string `env:"SSL_MODE" default:"disable"`
-	SSLCertPath string `env:"SSL_CERT_PATH"`
-	NeedMigrate bool   `env:"NEED_MIGRATE" default:"false"`
-}
-
-type Vk struct {
-	AccessToken string `env:"ACCESS_TOKEN"`
-}
-
-type Telegram struct {
-	BotToken string `env:"BOT_TOKEN"`
-}
-
-type Habr struct {
-	AuthToken string `env:"AUTH_TOKEN"`
-}
-
 type Config struct {
-	IsDebug  bool     `env:"IS_DEBUG"`
-	Postgres Postgres `env:"POSTGRES"`
-	Address  string   `env:"ADDRESS"`
-	Vk       Vk       `env:"VK"`
-	Telegram Telegram `env:"TELEGRAM"`
-	Habr     Habr     `env:"HABR"`
+	Address               string
+	DatabasePath          string
+	TelegramBotToken      string
+	TelegramAllowedChatID int64
 }
 
-func Load() *Config {
-	cfg := Config{}
-
-	err := aconfig.LoaderFor(&cfg, aconfig.Config{
-		EnvPrefix: "VIARTICLES",
-	}).Load()
-	if err != nil {
-		panic(err)
+func Load() (Config, error) {
+	cfg := Config{
+		Address:      envOrDefault("VIARTICLES_ADDRESS", ":8080"),
+		DatabasePath: envOrDefault("VIARTICLES_DATABASE_PATH", "./data/viarticles.db"),
+		TelegramBotToken: strings.TrimSpace(
+			os.Getenv("VIARTICLES_TELEGRAM_BOT_TOKEN"),
+		),
 	}
 
-	return &cfg
+	chatID := strings.TrimSpace(os.Getenv("VIARTICLES_TELEGRAM_ALLOWED_CHAT_ID"))
+	if chatID != "" {
+		parsed, err := strconv.ParseInt(chatID, 10, 64)
+		if err != nil {
+			return Config{}, fmt.Errorf("VIARTICLES_TELEGRAM_ALLOWED_CHAT_ID must be an integer: %w", err)
+		}
+		cfg.TelegramAllowedChatID = parsed
+	}
+
+	return cfg, nil
+}
+
+func envOrDefault(name, fallback string) string {
+	if value := strings.TrimSpace(os.Getenv(name)); value != "" {
+		return value
+	}
+	return fallback
 }

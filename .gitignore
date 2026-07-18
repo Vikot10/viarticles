@@ -4,4 +4,6 @@
 .yaml
 var/
 dist/
+web/node_modules/
+.cache/
 .claude

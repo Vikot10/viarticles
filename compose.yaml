@@ -1,0 +1,20 @@
+name: viarticles
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      VIARTICLES_ADDRESS: ":8080"
+      VIARTICLES_DATABASE_PATH: /data/viarticles.db
+      VIARTICLES_TELEGRAM_BOT_TOKEN: ${VIARTICLES_TELEGRAM_BOT_TOKEN:-}
+      VIARTICLES_TELEGRAM_ALLOWED_CHAT_ID: ${VIARTICLES_TELEGRAM_ALLOWED_CHAT_ID:-0}
+    ports:
+      - "${VIARTICLES_PORT:-8080}:8080"
+    volumes:
+      - viarticles-sqlite-data:/data
+    restart: unless-stopped
+
+volumes:
+  viarticles-sqlite-data:
